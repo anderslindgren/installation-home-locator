@@ -21,7 +21,6 @@ public class HomeLocator {
             final String tClassName = HomeLocator.class.getName();
             final String tClassFileName = tClassName.replaceAll("\\.", "/") + ".class";
             final URL tResource = ClassLoader.getSystemClassLoader().getResource(tClassFileName);
-            System.out.println(tResource);
             final URI tUri = tResource.toURI();
             String tPath = tUri.getPath();
             final int tJarFileSeparator = tPath.indexOf('$');

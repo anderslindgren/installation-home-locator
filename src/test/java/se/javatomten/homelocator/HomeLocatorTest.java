@@ -15,19 +15,19 @@ public class HomeLocatorTest {
     }
 
     @Test
-    public void localteFileOnDiskRelativeTwoLevelsUp() throws IOException {
+    public void locateFileOnDiskRelativeTwoLevelsUp() throws IOException {
         File tLocation = HomeLocator.getHomeLocation(new File("../.."));
         assertEquals(tLocation, new File(".").getCanonicalFile());
     }
     
     @Test
-    public void localteFileOnDiskRelativeIsNull() throws IOException {
+    public void locateFileOnDiskRelativeIsNull() throws IOException {
         File tLocation = HomeLocator.getHomeLocation(null);
         assertEquals(tLocation, new File("target/classes").getCanonicalFile());
     }
     
     @Test
-    public void localteFileOnDiskRelativeIsNonExisting() throws IOException {
+    public void locateFileOnDiskRelativeIsNonExisting() throws IOException {
         File tLocation = HomeLocator.getHomeLocation(new File("../putte"));
         assertEquals(tLocation, new File("target/putte").getCanonicalFile());
     }
