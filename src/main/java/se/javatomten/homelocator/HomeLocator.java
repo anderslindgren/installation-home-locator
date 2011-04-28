@@ -8,12 +8,14 @@ import java.net.URL;
 
 public class HomeLocator {
 
-    private HomeLocator() {
+    private static final char JAR_CONTENT_SEPARATOR = '!';
+
+	private HomeLocator() {
 
     }
 
-    public static File getHomeLocation(final File pRelativePath) {
-        if (pRelativePath != null && pRelativePath.isAbsolute()) {
+    public static File getHomeLocation(final String pRelativePath) {
+        if (pRelativePath != null && new File(pRelativePath).isAbsolute()) {
             throw new IllegalArgumentException("The parameter pRelativePath must be a relative path");
         }
         File tResult = null;
@@ -22,20 +24,25 @@ public class HomeLocator {
             final String tClassFileName = tClassName.replaceAll("\\.", "/") + ".class";
             final URL tResource = ClassLoader.getSystemClassLoader().getResource(tClassFileName);
             final URI tUri = tResource.toURI();
-            String tPath = tUri.getPath();
-            final int tJarFileSeparator = tPath.indexOf('$');
-            if (tJarFileSeparator >= 0) {
-                tPath = tPath.substring(0, tJarFileSeparator);
+            File tLocation;
+            if (tUri.getScheme().equals("jar")) {
+            	String tPath;
+            	tPath = tUri.getSchemeSpecificPart(); 
+            	final int tJarFileSeparator = tPath.lastIndexOf(JAR_CONTENT_SEPARATOR);
+            	if (tJarFileSeparator >= 0) {
+            		tPath = tPath.substring("file:".length(), tJarFileSeparator);
+            	}
+            	tLocation = new File(tPath).getParentFile();
             }
             else {
+            	String tPath = tUri.getPath();
                 tPath = tPath.replace(tClassFileName, "");
+                tLocation = new File(tPath);
             }
             if (pRelativePath != null) {
-                tPath += pRelativePath.toString();
+                tLocation = new File(tLocation.getCanonicalPath() + File.separatorChar + pRelativePath);
             }
-            System.out.println(tPath);
-            tResult = new File(tPath).getCanonicalFile();
-            System.out.println(tResult);
+            tResult = tLocation.getCanonicalFile();
         }
         catch (URISyntaxException e) {
             e.printStackTrace();

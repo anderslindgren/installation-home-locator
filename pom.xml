@@ -34,6 +34,12 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                	<additionalClasspathElements>
+                		<additionalClasspathElement>target/${artifactId}-${version}.jar</additionalClasspathElement>
+                	</additionalClasspathElements>
+                	<classesDirectory>putte</classesDirectory>
+                </configuration>
             </plugin>
         </plugins>
     </build>

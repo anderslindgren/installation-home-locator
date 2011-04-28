@@ -16,7 +16,7 @@ public class HomeLocatorTest {
 
     @Test
     public void locateFileOnDiskRelativeTwoLevelsUp() throws IOException {
-        File tLocation = HomeLocator.getHomeLocation(new File("../.."));
+        File tLocation = HomeLocator.getHomeLocation("../..");
         assertEquals(tLocation, new File(".").getCanonicalFile());
     }
     
@@ -28,19 +28,19 @@ public class HomeLocatorTest {
     
     @Test
     public void locateFileOnDiskRelativeIsNonExisting() throws IOException {
-        File tLocation = HomeLocator.getHomeLocation(new File("../putte"));
+        File tLocation = HomeLocator.getHomeLocation("../putte");
         assertEquals(tLocation, new File("target/putte").getCanonicalFile());
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void onlyRelativePathAllowed() {
         char tSep = File.separatorChar;
-        File tTestFile;
+        String tTestFile;
         if (tSep == '/') {
-            tTestFile = new File("/home/sweet/home"); // On Unix
+            tTestFile = "/home/sweet/home"; // On Unix
         }
         else {
-            tTestFile = new File("C:/home/sweet/home"); // On Windows
+            tTestFile = "C:/home/sweet/home"; // On Windows
         }
         HomeLocator.getHomeLocation(tTestFile);
     }
