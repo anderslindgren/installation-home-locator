@@ -1,51 +1,57 @@
 package se.javatomten.integrationtests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import se.javatomten.homelocator.HomeLocator;
 
 public class ITHomeLocator {
-    @Before
-    public void setUp() throws Exception {
-    	System.out.println(System.getProperty("java.class.path"));
-    }
 
     @Test
-    public void locateFileOnDiskRelativeOneLevelUp() throws IOException {
-        File tLocation = HomeLocator.getHomeLocation("..");
-        assertEquals(new File(".").getCanonicalPath(), tLocation.getPath());
+    public void locateHomeWhereNoRelativeGiven() throws IOException {
+        final File tHomeLocation = HomeLocator.getHomeLocation();
+        final String tExpectedLocation = new File("target").getCanonicalPath();
+        assertEquals("Home location not found", tExpectedLocation, tHomeLocation.getPath());
     }
     
     @Test
-    public void locateFileOnDiskNullRelative() throws IOException {
-    	File tLocation = HomeLocator.getHomeLocation(null);
-    	assertEquals(new File("target").getCanonicalPath(), tLocation.getPath());
+    public void locateHomeWhereRelativeIsOneLevelUp() throws IOException {
+        final String tRelativePath = "..";
+        final File tHomeLocation = HomeLocator.getHomeLocation(tRelativePath);
+        final String tExpectedLocation = new File(".").getCanonicalPath();
+        assertEquals("Home location not found", tExpectedLocation, tHomeLocation.getPath());
     }
     
+    @Test(expected=IllegalArgumentException.class)
+    public void nonExistingRelativePathIsNotAllowed() throws IOException {
+        final File tLocation = HomeLocator.getHomeLocation("../garble");
+        fail("Non existing directory is not allowed: " + tLocation.getPath());
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void relativePathPointingToFileIsNotAllowed() throws IOException {
+        final File tLocation = HomeLocator.getHomeLocation("README");
+        fail("Can't point to a file: " + tLocation.getPath());
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void absolutePathIsNotAllowed() throws IOException {
+        final char tSep = File.separatorChar;
+        final String tAbsolutePath;
+        if (tSep == '/') {
+            tAbsolutePath = "/home/sweet/home"; // On Unix
+        }
+        else {
+            tAbsolutePath = "C:/home/sweet/home"; // On Windows
+        }
 
-//    @Test
-//    public void locateFileOnDiskRelativeTwoLevelsUp() throws Exception {
-//        assertEquals(0, execute(new String[] {"../..", new File(".").getCanonicalPath()}));
-//    }
-
-//    private int execute(String[] args) throws Exception {
-//        File jar = new File("target/installation-home-locator-0.0.1-SNAPSHOT.jar");
-//
-//        String[] execArgs = new String[args.length + 4];
-//        execArgs[0] = "java";
-//        execArgs[1] = "-cp";
-//        execArgs[2] = jar.getCanonicalPath();
-//        execArgs[3] = "se.javatomten.homelocator.Main";
-//        System.arraycopy(args, 0, execArgs, 4, args.length);
-//        System.out.println(Arrays.asList(execArgs).toString());
-//        Process p = Runtime.getRuntime().exec(execArgs);
-//        p.waitFor();
-//        return p.exitValue();
-//    }
+        final File tHomeLocation = HomeLocator.getHomeLocation(tAbsolutePath);
+        fail("Got an unexpected result back: " + tHomeLocation);
+    }
+    
 }
