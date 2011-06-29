@@ -35,10 +35,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                	<additionalClasspathElements>
-                		<additionalClasspathElement>target/${artifactId}-${version}.jar</additionalClasspathElement>
-                	</additionalClasspathElements>
-                	<classesDirectory>putte</classesDirectory>
+                    <additionalClasspathElements>
+                        <additionalClasspathElement>target/${project.artifactId}-${project.version}.jar</additionalClasspathElement>
+                    </additionalClasspathElements>
+                    <classesDirectory>putte</classesDirectory>
                 </configuration>
             </plugin>
         </plugins>
