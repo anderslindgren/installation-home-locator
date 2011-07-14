@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
- * This is a helper class designed to locate the installation directory for your application.
+ * Helper class designed to locate the installation directory for your application.
  * 
  * Basically you would put this jar (or class) file in your directory of third party jars.
  * When calling the one of the {@link #getHomeLocation()} or {@link #getHomeLocation(String)} methods
@@ -19,17 +19,17 @@ public class HomeLocator {
 
     private static final char JAR_CONTENT_SEPARATOR = '!';
 
-	private HomeLocator() {
-
+    private HomeLocator() {
+        // Private constructor of a utility class.
     }
 
-	/**
-	 * Returns the actual location of either the directory holding the class files or the 
-	 * directory hold the jar file where the class file is located.
-	 * 
-	 * @return the location (directory) of the jar file or base directory of the class file if not using
-	 * the jar file.
-	 */
+    /**
+     * Returns the actual location of either the directory holding the class files or the 
+     * directory hold the jar file where the class file is located.
+     * 
+     * @return the location (directory) of the jar file or base directory of the class file if not using
+     * the jar file.
+     */
     public static File getHomeLocation() {
         return getHomeLocation(null);
     }
@@ -59,16 +59,16 @@ public class HomeLocator {
             final URI tUri = tResource.toURI();
             File tLocation;
             if (tUri.getScheme().equals("jar")) {
-            	String tPath;
-            	tPath = tUri.getSchemeSpecificPart(); 
-            	final int tJarFileSeparator = tPath.lastIndexOf(JAR_CONTENT_SEPARATOR);
-            	if (tJarFileSeparator >= 0) {
-            		tPath = tPath.substring("file:".length(), tJarFileSeparator);
-            	}
-            	tLocation = new File(tPath).getParentFile();
+                String tPath;
+                tPath = tUri.getSchemeSpecificPart(); 
+                final int tJarFileSeparator = tPath.lastIndexOf(JAR_CONTENT_SEPARATOR);
+                if (tJarFileSeparator >= 0) {
+                    tPath = tPath.substring("file:".length(), tJarFileSeparator);
+                }
+                tLocation = new File(tPath).getParentFile();
             }
             else {
-            	String tPath = tUri.getPath();
+                String tPath = tUri.getPath();
                 tPath = tPath.replace(tClassFileName, "");
                 tLocation = new File(tPath);
             }
@@ -85,9 +85,11 @@ public class HomeLocator {
             }
         }
         catch (URISyntaxException e) {
+            // TODO Added a specific Exception Here
             e.printStackTrace();
         }
         catch (IOException e) {
+            // TODO Added a specific Exception Here
             e.printStackTrace();
         }
         return tResult;
