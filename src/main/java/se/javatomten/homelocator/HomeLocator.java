@@ -17,19 +17,29 @@ import java.net.URL;
  */
 public class HomeLocator {
 
+    private enum PATH_GIVEN { YES, NO }
+
     private static final char JAR_CONTENT_SEPARATOR = '!';
 
     private File mRelativePath;
+    private PATH_GIVEN mRelativePathGiven;
 
     public HomeLocator() {
-        this(null);
+        mRelativePathGiven = PATH_GIVEN.NO;
     }
 
     public HomeLocator(final File pRelativePath) {
         setRelativePath(pRelativePath);
     }
 
+    public HomeLocator(final String pRelativePath) {
+        setRelativePath(pRelativePath);
+    }
+
     public File getRelativePath() {
+        if (mRelativePathGiven == PATH_GIVEN.NO) {
+            throw new RelativeLocationNotSetException();
+        }
         return mRelativePath;
     }
 
@@ -42,10 +52,22 @@ public class HomeLocator {
             throw new IllegalArgumentException("The parameter pRelativePath must be a relative path: " + pRelativePath);
         }
         mRelativePath = pRelativePath;
+        mRelativePathGiven = PATH_GIVEN.YES;
     }
 
+    public void unsetRelativePath() {
+        mRelativePathGiven = PATH_GIVEN.NO;
+    }
+
+    /**
+     * Returns the actual location of either the directory holding the class files or the
+     * directory holding the jar file where the class file is located.
+     *
+     * @return the absolute directory of the jar file where this class is located in
+     * or the base directory of this class file if not packaged into a jar file.
+     */
     public File getLocation() {
-        File tResult = null;
+        File tResult;
         try {
             final String tClassName = HomeLocator.class.getName();
             final String tClassFileName = convertClassNameToFileName(tClassName);
@@ -63,12 +85,10 @@ public class HomeLocator {
             checkFileIsDirectoryOrThrowException(tResult);
         }
         catch (URISyntaxException e) {
-            // TODO Added a specific Exception Here
-            e.printStackTrace();
+            throw new HomeLocatorException(e);
         }
         catch (IOException e) {
-            // TODO Added a specific Exception Here
-            e.printStackTrace();
+            throw new HomeLocatorException(e);
         }
 
         return tResult;
@@ -92,21 +112,19 @@ public class HomeLocator {
     }
 
     private File applyRelativePath(File tLocation) throws IOException {
-        if (mRelativePath != null) {
+        if (mRelativePathGiven == PATH_GIVEN.YES) {
             tLocation = new File(tLocation.getCanonicalPath() + File.separatorChar + mRelativePath);
         }
         return tLocation;
     }
 
     private String convertClassNameToFileName(String tClassName) {
-        final String tClassFileName = tClassName.replaceAll("\\.", "/") + ".class";
-        return tClassFileName;
+        return tClassName.replaceAll("\\.", "/") + ".class";
     }
 
     private URI getClassURI(String tClassFileName) throws URISyntaxException {
         final URL tResource = ClassLoader.getSystemClassLoader().getResource(tClassFileName);
-        final URI tUri = tResource.toURI();
-        return tUri;
+        return tResource.toURI();
     }
 
     private File locateFromClassFileDirectory(String tClassFileName, URI tUri) {
