@@ -11,10 +11,11 @@ import org.junit.Test;
 import se.javatomten.homelocator.HomeLocator;
 
 public class ITHomeLocator {
-
+	
     @Test
     public void locateHomeWhereNoRelativeGiven() throws IOException {
-        final File tHomeLocation = HomeLocator.getHomeLocation();
+    	final HomeLocator tLocator = new HomeLocator();
+        final File tHomeLocation = tLocator.getLocation();
         final String tExpectedLocation = new File("target").getCanonicalPath();
         assertEquals("Home location not found", tExpectedLocation, tHomeLocation.getPath());
     }
@@ -22,20 +23,23 @@ public class ITHomeLocator {
     @Test
     public void locateHomeWhereRelativeIsOneLevelUp() throws IOException {
         final String tRelativePath = "..";
-        final File tHomeLocation = HomeLocator.getHomeLocation(tRelativePath);
+    	final HomeLocator tLocator = new HomeLocator(tRelativePath);
+        final File tHomeLocation = tLocator.getLocation();
         final String tExpectedLocation = new File(".").getCanonicalPath();
         assertEquals("Home location not found", tExpectedLocation, tHomeLocation.getPath());
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void nonExistingRelativePathIsNotAllowed() throws IOException {
-        final File tLocation = HomeLocator.getHomeLocation("../garble");
+    	final HomeLocator tLocator = new HomeLocator("../garble");
+        final File tLocation = tLocator.getLocation();
         fail("Non existing directory is not allowed: " + tLocation.getPath());
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void relativePathPointingToFileIsNotAllowed() throws IOException {
-        final File tLocation = HomeLocator.getHomeLocation("README");
+    	final HomeLocator tLocator = new HomeLocator("README");
+        final File tLocation = tLocator.getLocation();
         fail("Can't point to a file: " + tLocation.getPath());
     }
     
@@ -50,7 +54,8 @@ public class ITHomeLocator {
             tAbsolutePath = "C:/home/sweet/home"; // On Windows
         }
 
-        final File tHomeLocation = HomeLocator.getHomeLocation(tAbsolutePath);
+    	final HomeLocator tLocator = new HomeLocator(tAbsolutePath);
+        final File tHomeLocation = tLocator.getLocation();
         fail("Got an unexpected result back: " + tHomeLocation);
     }
     
