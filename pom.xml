@@ -5,7 +5,7 @@
 
 	<groupId>se.javatomten.installation-home-locator</groupId>
 	<artifactId>installation-home-locator</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>Installation Home Locator</name>
 
 	<description>See README file.</description>
