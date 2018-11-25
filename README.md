@@ -20,7 +20,7 @@ So how do I use this? It's easy! Include the jar file in your directory of third
 
 In your application you only need to add a few lines (or cram it together on one line if you like):
 
-```
+```java
 import java.io.File;
 import se.javatomten.homelocator.*;
 
