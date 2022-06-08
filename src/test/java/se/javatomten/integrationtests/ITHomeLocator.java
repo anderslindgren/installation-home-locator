@@ -14,37 +14,37 @@ public class ITHomeLocator {
 	
     @Test
     public void locateHomeWhereNoRelativeGiven() throws IOException {
-    	final HomeLocator tLocator = new HomeLocator();
-        final File tHomeLocation = tLocator.getLocation();
-        final String tExpectedLocation = new File("target").getCanonicalPath();
-        assertEquals("Home location not found", tExpectedLocation, tHomeLocation.getPath());
+    	final HomeLocator locator = new HomeLocator();
+        final File homeLocation = locator.getLocation();
+        final String expectedLocation = new File("target").getCanonicalPath();
+        assertEquals("Home location not found", expectedLocation, homeLocation.getPath());
     }
     
     @Test
     public void locateHomeWhereRelativeIsOneLevelUp() throws IOException {
         final String tRelativePath = "..";
-    	final HomeLocator tLocator = new HomeLocator(tRelativePath);
-        final File tHomeLocation = tLocator.getLocation();
-        final String tExpectedLocation = new File(".").getCanonicalPath();
-        assertEquals("Home location not found", tExpectedLocation, tHomeLocation.getPath());
+    	final HomeLocator locator = new HomeLocator(tRelativePath);
+        final File homeLocation = locator.getLocation();
+        final String expectedLocation = new File(".").getCanonicalPath();
+        assertEquals("Home location not found", expectedLocation, homeLocation.getPath());
     }
     
     @Test(expected=IllegalArgumentException.class)
-    public void nonExistingRelativePathIsNotAllowed() throws IOException {
-    	final HomeLocator tLocator = new HomeLocator("../garble");
-        final File tLocation = tLocator.getLocation();
+    public void nonExistingRelativePathIsNotAllowed() {
+    	final HomeLocator locator = new HomeLocator("../garble");
+        final File tLocation = locator.getLocation();
         fail("Non existing directory is not allowed: " + tLocation.getPath());
     }
     
     @Test(expected=IllegalArgumentException.class)
-    public void relativePathPointingToFileIsNotAllowed() throws IOException {
-    	final HomeLocator tLocator = new HomeLocator("README");
-        final File tLocation = tLocator.getLocation();
+    public void relativePathPointingToFileIsNotAllowed() {
+    	final HomeLocator locator = new HomeLocator("README");
+        final File tLocation = locator.getLocation();
         fail("Can't point to a file: " + tLocation.getPath());
     }
     
     @Test(expected=IllegalArgumentException.class)
-    public void absolutePathIsNotAllowed() throws IOException {
+    public void absolutePathIsNotAllowed() {
         final char tSep = File.separatorChar;
         final String tAbsolutePath;
         if (tSep == '/') {
@@ -54,9 +54,9 @@ public class ITHomeLocator {
             tAbsolutePath = "C:/home/sweet/home"; // On Windows
         }
 
-    	final HomeLocator tLocator = new HomeLocator(tAbsolutePath);
-        final File tHomeLocation = tLocator.getLocation();
-        fail("Got an unexpected result back: " + tHomeLocation);
+    	final HomeLocator locator = new HomeLocator(tAbsolutePath);
+        final File homeLocation = locator.getLocation();
+        fail("Got an unexpected result back: " + homeLocation);
     }
     
 }

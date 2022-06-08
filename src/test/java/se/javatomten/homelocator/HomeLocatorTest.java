@@ -21,32 +21,32 @@ public class HomeLocatorTest {
     @Test
     public void locateHomeWhereRelativeTwoLevelsUp() throws IOException {
         mHomeLocator.setRelativePath("../..");
-        final File tHomeLocation = mHomeLocator.getLocation();
-        final File tExpectedLocation = new File(".").getCanonicalFile();
-        assertEquals("Could not find expected location", tExpectedLocation, tHomeLocation);
+        final File homeLocation = mHomeLocator.getLocation();
+        final File expectedLocation = new File(".").getCanonicalFile();
+        assertEquals("Could not find expected location", expectedLocation, homeLocation);
     }
     
     @Test
     public void locateHomeWhereRelativeTwoLevelsUpUsingStringConstructor() throws IOException {
-        HomeLocator tHomeLocator = new HomeLocator("../..");
-        final File tHomeLocation = tHomeLocator.getLocation();
-        final File tExpectedLocation = new File(".").getCanonicalFile();
-        assertEquals("Could not find expected location", tExpectedLocation, tHomeLocation);
+        HomeLocator homeLocator = new HomeLocator("../..");
+        final File homeLocation = homeLocator.getLocation();
+        final File expectedLocation = new File(".").getCanonicalFile();
+        assertEquals("Could not find expected location", expectedLocation, homeLocation);
     }
 
     @Test
     public void locateHomeWhereRelativeTwoLevelsUpUsingFileConstructor() throws IOException {
-        HomeLocator tHomeLocator = new HomeLocator(new File("../.."));
-        final File tHomeLocation = tHomeLocator.getLocation();
-        final File tExpectedLocation = new File(".").getCanonicalFile();
-        assertEquals("Could not find expected location", tExpectedLocation, tHomeLocation);
+        HomeLocator homeLocator = new HomeLocator(new File("../.."));
+        final File homeLocation = homeLocator.getLocation();
+        final File expectedLocation = new File(".").getCanonicalFile();
+        assertEquals("Could not find expected location", expectedLocation, homeLocation);
     }
 
     @Test
     public void locateHomeWhereNoRelativeIsGiven() throws IOException {
-        final File tHomeLocation = mHomeLocator.getLocation();
-        final File tExpectedLocation = new File("target/classes").getCanonicalFile();
-        assertEquals("Could not find expected location", tExpectedLocation, tHomeLocation);
+        final File homeLocation = mHomeLocator.getLocation();
+        final File expectedLocation = new File("target/classes").getCanonicalFile();
+        assertEquals("Could not find expected location", expectedLocation, homeLocation);
     }
 
     @Test(expected = RelativeLocationNotSetException.class)
@@ -56,29 +56,29 @@ public class HomeLocatorTest {
     
     @Test
     public void getRelativePathTwoLevelsUp() {
-        HomeLocator tHomeLocator = new HomeLocator("../..");
-        File tRelativePath = tHomeLocator.getRelativePath();
+        HomeLocator homeLocator = new HomeLocator("../..");
+        File tRelativePath = homeLocator.getRelativePath();
         assertEquals("Relative File wrong", new File("../.."), tRelativePath);
     }
 
     @Test(expected = RelativeLocationNotSetException.class)
     public void unsetRelativePath() {
-        HomeLocator tHomeLocator = new HomeLocator("../..");
-        File tRelativePath = tHomeLocator.getRelativePath();
+        HomeLocator homeLocator = new HomeLocator("../..");
+        File tRelativePath = homeLocator.getRelativePath();
         assertEquals("Relative File wrong", new File("../.."), tRelativePath);
-        tHomeLocator.unsetRelativePath();
-        tHomeLocator.getRelativePath();
+        homeLocator.unsetRelativePath();
+        homeLocator.getRelativePath();
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public void nonExistingRelativePathIsNotAllowed() throws IOException {
+    public void nonExistingRelativePathIsNotAllowed() {
         mHomeLocator.setRelativePath("../garble");
         final File tLocation = mHomeLocator.getLocation();
         fail("Non existing directory is not allowed: " + tLocation.getPath());
     }
     
     @Test(expected=IllegalArgumentException.class)
-    public void relativePathPointingToFileIsNotAllowed() throws IOException {
+    public void relativePathPointingToFileIsNotAllowed() {
         mHomeLocator.setRelativePath("README");
         final File tLocation = mHomeLocator.getLocation();
         fail("Can't point to a file: " + tLocation.getPath());

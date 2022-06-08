@@ -26,42 +26,42 @@ public class HomeLocator {
 
     private static final char JAR_CONTENT_SEPARATOR = '!';
 
-    private File mRelativePath;
-    private PATH_GIVEN mRelativePathGiven;
+    private File relativePath;
+    private PATH_GIVEN relativePathGiven;
 
     public HomeLocator() {
-        mRelativePathGiven = PATH_GIVEN.NO;
+        relativePathGiven = PATH_GIVEN.NO;
     }
 
-    public HomeLocator(final File pRelativePath) {
-        setRelativePath(pRelativePath);
+    public HomeLocator(final File relativePath) {
+        setRelativePath(relativePath);
     }
 
-    public HomeLocator(final String pRelativePath) {
-        setRelativePath(pRelativePath);
+    public HomeLocator(final String relativePath) {
+        setRelativePath(relativePath);
     }
 
     public File getRelativePath() {
-        if (mRelativePathGiven == PATH_GIVEN.NO) {
+        if (relativePathGiven == PATH_GIVEN.NO) {
             throw new RelativeLocationNotSetException();
         }
-        return mRelativePath;
+        return relativePath;
     }
 
-    public void setRelativePath(final String pRelativePath) {
-        setRelativePath(new File(pRelativePath));
+    public void setRelativePath(final String relativePath) {
+        setRelativePath(new File(relativePath));
     }
 
-    public void setRelativePath(final File pRelativePath) {
-        if (pRelativePath != null && pRelativePath.isAbsolute()) {
-            throw new IllegalArgumentException("The parameter pRelativePath must be a relative path: " + pRelativePath);
+    public void setRelativePath(final File relativePath) {
+        if (relativePath != null && relativePath.isAbsolute()) {
+            throw new IllegalArgumentException("The parameter relativePath must be a relative path: " + relativePath);
         }
-        mRelativePath = pRelativePath;
-        mRelativePathGiven = PATH_GIVEN.YES;
+        this.relativePath = relativePath;
+        relativePathGiven = PATH_GIVEN.YES;
     }
 
     public void unsetRelativePath() {
-        mRelativePathGiven = PATH_GIVEN.NO;
+        relativePathGiven = PATH_GIVEN.NO;
     }
 
     /**
@@ -72,84 +72,84 @@ public class HomeLocator {
      * or the base directory of this class file if not packaged into a jar file.
      */
     public File getLocation() {
-        File tResult;
+        File result;
         try {
-            final String tClassName = HomeLocator.class.getName();
-            final String tClassFileName = convertClassNameToFileName(tClassName);
-            final URI tUri = getClassURI(tClassFileName);
-            File tLocation;
-            if (isClassPackagedInJar(tUri)) {
-                tLocation = locateFromJarFile(tUri);
+            final String className = HomeLocator.class.getName();
+            final String classFileName = convertClassNameToFileName(className);
+            final URI uri = getClassURI(classFileName);
+            File location;
+            if (isClassPackagedInJar(uri)) {
+                location = locateFromJarFile(uri);
             }
             else {
-                tLocation = locateFromClassFileDirectory(tClassFileName, tUri);
+                location = locateFromClassFileDirectory(classFileName, uri);
             }
-            tLocation = applyRelativePath(tLocation);
-            tResult = tLocation.getCanonicalFile();
-            checkFileExistingOrThrowException(tResult);
-            checkFileIsDirectoryOrThrowException(tResult);
+            location = applyRelativePath(location);
+            result = location.getCanonicalFile();
+            checkFileExistingOrThrowException(result);
+            checkFileIsDirectoryOrThrowException(result);
         }
-        catch (URISyntaxException e) {
-            throw new HomeLocatorException(e);
-        }
-        catch (IOException e) {
+        catch (URISyntaxException | IOException e) {
             throw new HomeLocatorException(e);
         }
 
-        return tResult;
+        return result;
     }
 
-    private void checkFileIsDirectoryOrThrowException(File tResult) {
-        if (!tResult.isDirectory()) {
-            throw new IllegalArgumentException("Relative path pointing to a file: " + tResult.getPath());
+    private void checkFileIsDirectoryOrThrowException(File file) {
+        if (!file.isDirectory()) {
+            throw new IllegalArgumentException("Relative path pointing to a file: " + file.getPath());
         }
     }
 
-    private void checkFileExistingOrThrowException(File tResult) {
-        if (!tResult.exists()) {
-            throw new IllegalArgumentException("Relative path pointing to non-existing directory: "
-                    + tResult.getPath());
+    private void checkFileExistingOrThrowException(File file) {
+        if (!file.exists()) {
+            throw new IllegalArgumentException("Relative path pointing to non-existing directory: " + file.getPath());
         }
     }
 
-    private boolean isClassPackagedInJar(URI tUri) {
-        return tUri.getScheme().equals("jar");
+    private boolean isClassPackagedInJar(URI uri) {
+        return uri.getScheme().equals("jar");
     }
 
-    private File applyRelativePath(File tLocation) throws IOException {
-        if (mRelativePathGiven == PATH_GIVEN.YES) {
-            tLocation = new File(tLocation.getCanonicalPath() + File.separatorChar + mRelativePath);
+    private File applyRelativePath(File location) throws IOException {
+        if (relativePathGiven == PATH_GIVEN.YES) {
+            location = new File(location.getCanonicalPath() + File.separatorChar + relativePath);
         }
-        return tLocation;
+        return location;
     }
 
-    private String convertClassNameToFileName(String tClassName) {
-        return tClassName.replaceAll("\\.", "/") + ".class";
+    private String convertClassNameToFileName(String className) {
+        return className.replaceAll("\\.", "/") + ".class";
     }
 
-    private URI getClassURI(String tClassFileName) throws URISyntaxException {
-        final URL tResource = ClassLoader.getSystemClassLoader().getResource(tClassFileName);
-        return tResource.toURI();
-    }
-
-    private File locateFromClassFileDirectory(String tClassFileName, URI tUri) {
-        File tLocation;
-        String tPath = tUri.getPath();
-        tPath = tPath.replace(tClassFileName, "");
-        tLocation = new File(tPath);
-        return tLocation;
-    }
-
-    private File locateFromJarFile(URI tUri) {
-        File tLocation;
-        String tPath;
-        tPath = tUri.getSchemeSpecificPart();
-        final int tJarFileSeparator = tPath.lastIndexOf(JAR_CONTENT_SEPARATOR);
-        if (tJarFileSeparator >= 0) {
-            tPath = tPath.substring("file:".length(), tJarFileSeparator);
+    private URI getClassURI(String classFileName) throws URISyntaxException {
+        final URL resource = ClassLoader.getSystemClassLoader().getResource(classFileName);
+        if (resource == null) {
+            throw new HomeLocatorException("Could not find home locator class");
         }
-        tLocation = new File(tPath).getParentFile();
-        return tLocation;
+        return resource.toURI();
+    }
+
+    private File locateFromClassFileDirectory(String classFileName, URI uri) {
+        File location;
+
+        String path = uri.getPath();
+        path = path.replace(classFileName, "");
+        location = new File(path);
+        return location;
+    }
+
+    private File locateFromJarFile(URI uri) {
+        File location;
+        String path;
+        path = uri.getSchemeSpecificPart();
+        final int jarFileSeparator = path.lastIndexOf(JAR_CONTENT_SEPARATOR);
+        if (jarFileSeparator >= 0) {
+            path = path.substring("file:".length(), jarFileSeparator);
+        }
+        location = new File(path).getParentFile();
+        return location;
     }
 
 }
