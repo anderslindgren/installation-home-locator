@@ -90,6 +90,29 @@ public class HomeLocatorTest {
     }
 
     @Test
+    public void nullRelativePathIsNotAllowed() {
+        final HomeLocator homeLocator = new HomeLocator();
+
+        IllegalArgumentException illegalArgumentException =
+                assertThrows(IllegalArgumentException.class, () -> homeLocator.setRelativePath((String) null));
+
+        assertThat("Non existing directory is not allowed", illegalArgumentException, notNullValue());
+        assertThat(illegalArgumentException.getMessage(),
+                equalTo("The parameter relativePath can not be null"));
+    }
+    @Test
+    public void nullRelativePathFileIsNotAllowed() {
+        final HomeLocator homeLocator = new HomeLocator();
+
+        IllegalArgumentException illegalArgumentException =
+                assertThrows(IllegalArgumentException.class, () -> homeLocator.setRelativePath((File) null));
+
+        assertThat("Non existing directory is not allowed", illegalArgumentException, notNullValue());
+        assertThat(illegalArgumentException.getMessage(),
+                equalTo("The parameter relativePath can not be null"));
+    }
+
+    @Test
     public void relativePathPointingToFileIsNotAllowed() {
         final HomeLocator homeLocator = new HomeLocator();
         homeLocator.setRelativePath("README");

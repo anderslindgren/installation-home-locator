@@ -8,29 +8,26 @@ import java.net.URL;
 
 /**
  * Helper class designed to locate the installation directory for your application.
- *
+ * <p>
  * Basically you would put this jar (or class) file in your directory of third party jars.
  * Basic usage would be:
  * <pre>
  * HomeLocator tLocator = new HomeLocator("..");
  * File tLocation = tLocator.getLocation();
  * </pre>
- * When calling the {@link #getLocation()} method you will get a File back pointing you 
+ * When calling the {@link #getLocation()} method you will get a File back pointing you
  * to where on the file system your application has been installed.
  *
  * @author Anders Lindgren
  */
 public class HomeLocator {
 
-    private enum PATH_GIVEN { YES, NO }
-
     private static final char JAR_CONTENT_SEPARATOR = '!';
 
     private File relativePath;
-    private PATH_GIVEN relativePathGiven;
+    private boolean relativePathGiven;
 
     public HomeLocator() {
-        relativePathGiven = PATH_GIVEN.NO;
     }
 
     public HomeLocator(final File relativePath) {
@@ -42,26 +39,32 @@ public class HomeLocator {
     }
 
     public File getRelativePath() {
-        if (relativePathGiven == PATH_GIVEN.NO) {
+        if (!relativePathGiven) {
             throw new RelativeLocationNotSetException("Relative path not set");
         }
         return relativePath;
     }
 
     public void setRelativePath(final String relativePath) {
+        if (relativePath == null) {
+            throw new IllegalArgumentException("The parameter relativePath can not be null");
+        }
         setRelativePath(new File(relativePath));
     }
 
     public void setRelativePath(final File relativePath) {
-        if (relativePath != null && relativePath.isAbsolute()) {
+        if (relativePath == null) {
+            throw new IllegalArgumentException("The parameter relativePath can not be null");
+        }
+        if (relativePath.isAbsolute()) {
             throw new IllegalArgumentException("The parameter relativePath must be a relative path: " + relativePath);
         }
         this.relativePath = relativePath;
-        relativePathGiven = PATH_GIVEN.YES;
+        relativePathGiven = true;
     }
 
     public void unsetRelativePath() {
-        relativePathGiven = PATH_GIVEN.NO;
+        relativePathGiven = false;
     }
 
     /**
@@ -80,16 +83,14 @@ public class HomeLocator {
             File location;
             if (isClassPackagedInJar(uri)) {
                 location = locateFromJarFile(uri);
-            }
-            else {
+            } else {
                 location = locateFromClassFileDirectory(classFileName, uri);
             }
-            location = applyRelativePath(location);
-            result = location.getCanonicalFile();
+            final File relativeLocation = applyRelativePath(location);
+            result = relativeLocation.getCanonicalFile();
             checkFileExistingOrThrowException(result);
             checkFileIsDirectoryOrThrowException(result);
-        }
-        catch (URISyntaxException | IOException e) {
+        } catch (URISyntaxException | IOException e) {
             throw new HomeLocatorException(e);
         }
 
@@ -113,8 +114,8 @@ public class HomeLocator {
     }
 
     private File applyRelativePath(File location) throws IOException {
-        if (relativePathGiven == PATH_GIVEN.YES) {
-            location = new File(location.getCanonicalPath() + File.separatorChar + relativePath);
+        if (relativePathGiven) {
+            return new File(location.getCanonicalPath() + File.separatorChar + relativePath);
         }
         return location;
     }
