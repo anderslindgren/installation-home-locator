@@ -43,7 +43,7 @@ public class HomeLocator {
 
     public File getRelativePath() {
         if (relativePathGiven == PATH_GIVEN.NO) {
-            throw new RelativeLocationNotSetException();
+            throw new RelativeLocationNotSetException("Relative path not set");
         }
         return relativePath;
     }

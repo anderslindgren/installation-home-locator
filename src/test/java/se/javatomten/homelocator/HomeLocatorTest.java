@@ -1,101 +1,122 @@
 package se.javatomten.homelocator;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class HomeLocatorTest {
 
-    private HomeLocator mHomeLocator;
-
-    @Before
-    public void setup() {
-        mHomeLocator = new HomeLocator();
-    }
+    public static final String RELATIVE_PATH = "../..";
 
     @Test
     public void locateHomeWhereRelativeTwoLevelsUp() throws IOException {
-        mHomeLocator.setRelativePath("../..");
-        final File homeLocation = mHomeLocator.getLocation();
-        final File expectedLocation = new File(".").getCanonicalFile();
-        assertEquals("Could not find expected location", expectedLocation, homeLocation);
-    }
-    
-    @Test
-    public void locateHomeWhereRelativeTwoLevelsUpUsingStringConstructor() throws IOException {
-        HomeLocator homeLocator = new HomeLocator("../..");
+        final HomeLocator homeLocator = new HomeLocator();
+        homeLocator.setRelativePath(RELATIVE_PATH);
         final File homeLocation = homeLocator.getLocation();
         final File expectedLocation = new File(".").getCanonicalFile();
-        assertEquals("Could not find expected location", expectedLocation, homeLocation);
+        assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
+    }
+
+    @Test
+    public void locateHomeWhereRelativeTwoLevelsUpUsingStringConstructor() throws IOException {
+        final HomeLocator homeLocator = new HomeLocator(RELATIVE_PATH);
+        final File homeLocation = homeLocator.getLocation();
+        final File expectedLocation = new File(".").getCanonicalFile();
+        assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
     }
 
     @Test
     public void locateHomeWhereRelativeTwoLevelsUpUsingFileConstructor() throws IOException {
-        HomeLocator homeLocator = new HomeLocator(new File("../.."));
+        final HomeLocator homeLocator = new HomeLocator(new File(RELATIVE_PATH));
         final File homeLocation = homeLocator.getLocation();
         final File expectedLocation = new File(".").getCanonicalFile();
-        assertEquals("Could not find expected location", expectedLocation, homeLocation);
+        assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
     }
 
     @Test
     public void locateHomeWhereNoRelativeIsGiven() throws IOException {
-        final File homeLocation = mHomeLocator.getLocation();
+        final HomeLocator homeLocator = new HomeLocator();
+        final File homeLocation = homeLocator.getLocation();
         final File expectedLocation = new File("target/classes").getCanonicalFile();
-        assertEquals("Could not find expected location", expectedLocation, homeLocation);
+        assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
     }
 
-    @Test(expected = RelativeLocationNotSetException.class)
+    @Test
     public void getRelativePathWhenNonHasBeenGiven() {
-        mHomeLocator.getRelativePath();
+        final HomeLocator homeLocator = new HomeLocator();
+        RelativeLocationNotSetException relativeLocationNotSetException =
+                assertThrows(RelativeLocationNotSetException.class, homeLocator::getRelativePath);
+        assertThat(relativeLocationNotSetException, notNullValue());
+        assertThat(relativeLocationNotSetException.getMessage(), containsString("Relative path not set"));
     }
-    
+
     @Test
     public void getRelativePathTwoLevelsUp() {
-        HomeLocator homeLocator = new HomeLocator("../..");
-        File tRelativePath = homeLocator.getRelativePath();
-        assertEquals("Relative File wrong", new File("../.."), tRelativePath);
+        final HomeLocator homeLocator = new HomeLocator(RELATIVE_PATH);
+        final File relativePath = homeLocator.getRelativePath();
+        assertThat("Relative File wrong", relativePath, equalTo(new File(RELATIVE_PATH)));
     }
 
-    @Test(expected = RelativeLocationNotSetException.class)
+    @Test
     public void unsetRelativePath() {
-        HomeLocator homeLocator = new HomeLocator("../..");
-        File tRelativePath = homeLocator.getRelativePath();
-        assertEquals("Relative File wrong", new File("../.."), tRelativePath);
+        final HomeLocator homeLocator = new HomeLocator(RELATIVE_PATH);
+        final File tRelativePath = homeLocator.getRelativePath();
+        assertEquals(new File(RELATIVE_PATH), tRelativePath, "Relative File wrong");
         homeLocator.unsetRelativePath();
-        homeLocator.getRelativePath();
+        RelativeLocationNotSetException relativeLocationNotSetException =
+                assertThrows(RelativeLocationNotSetException.class, homeLocator::getRelativePath);
+
+        assertThat(relativeLocationNotSetException, notNullValue());
+        assertThat(relativeLocationNotSetException.getMessage(), containsString("Relative path not set"));
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void nonExistingRelativePathIsNotAllowed() {
-        mHomeLocator.setRelativePath("../garble");
-        final File tLocation = mHomeLocator.getLocation();
-        fail("Non existing directory is not allowed: " + tLocation.getPath());
+        final HomeLocator homeLocator = new HomeLocator();
+        homeLocator.setRelativePath("../garble");
+
+        IllegalArgumentException illegalArgumentException =
+                assertThrows(IllegalArgumentException.class, homeLocator::getLocation);
+
+        assertThat("Non existing directory is not allowed", illegalArgumentException, notNullValue());
+        assertThat(illegalArgumentException.getMessage(),
+                containsString("Relative path pointing to non-existing directory:"));
     }
-    
-    @Test(expected=IllegalArgumentException.class)
+
+    @Test
     public void relativePathPointingToFileIsNotAllowed() {
-        mHomeLocator.setRelativePath("README");
-        final File tLocation = mHomeLocator.getLocation();
-        fail("Can't point to a file: " + tLocation.getPath());
+        final HomeLocator homeLocator = new HomeLocator();
+        homeLocator.setRelativePath("README");
+        IllegalArgumentException illegalArgumentException =
+                assertThrows(IllegalArgumentException.class, homeLocator::getLocation);
+
+        assertThat("Can't point to a file", illegalArgumentException, notNullValue());
+        assertThat(illegalArgumentException.getMessage(),
+                containsString("Relative path pointing to non-existing directory:"));
     }
-    
-    @Test(expected=IllegalArgumentException.class)
+
+    @Test
     public void absolutePathIsNotAllowed() {
+        final HomeLocator homeLocator = new HomeLocator();
         final char tSep = File.separatorChar;
         final String tTestFile;
         if (tSep == '/') {
             tTestFile = "/home/sweet/home"; // On Unix
-        }
-        else {
+        } else {
             tTestFile = "C:/home/sweet/home"; // On Windows
         }
-        mHomeLocator.setRelativePath(tTestFile);
-        mHomeLocator.getLocation();
+        IllegalArgumentException illegalArgumentException =
+                assertThrows(IllegalArgumentException.class, () -> homeLocator.setRelativePath(tTestFile));
+
+        assertThat("Relative path can't be absolute", illegalArgumentException, notNullValue());
+        assertThat(illegalArgumentException.getMessage(),
+                containsString("The parameter relativePath must be a relative path:"));
     }
 
 }
