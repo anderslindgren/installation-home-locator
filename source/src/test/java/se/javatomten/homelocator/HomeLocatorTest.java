@@ -66,8 +66,8 @@ public class HomeLocatorTest {
     @Test
     public void unsetRelativePath() {
         final HomeLocator homeLocator = new HomeLocator(RELATIVE_PATH);
-        final File tRelativePath = homeLocator.getRelativePath();
-        assertEquals(new File(RELATIVE_PATH), tRelativePath, "Relative File wrong");
+        final File relativePath = homeLocator.getRelativePath();
+        assertEquals(new File(RELATIVE_PATH), relativePath, "Relative File wrong");
         homeLocator.unsetRelativePath();
         RelativeLocationNotSetException relativeLocationNotSetException =
                 assertThrows(RelativeLocationNotSetException.class, homeLocator::getRelativePath);
@@ -127,15 +127,15 @@ public class HomeLocatorTest {
     @Test
     public void absolutePathIsNotAllowed() {
         final HomeLocator homeLocator = new HomeLocator();
-        final char tSep = File.separatorChar;
-        final String tTestFile;
-        if (tSep == '/') {
-            tTestFile = "/home/sweet/home"; // On Unix
+        final char separatorChar = File.separatorChar;
+        final String testFile;
+        if (separatorChar == '/') {
+            testFile = "/home/sweet/home"; // On Unix
         } else {
-            tTestFile = "C:/home/sweet/home"; // On Windows
+            testFile = "C:/home/sweet/home"; // On Windows
         }
         IllegalArgumentException illegalArgumentException =
-                assertThrows(IllegalArgumentException.class, () -> homeLocator.setRelativePath(tTestFile));
+                assertThrows(IllegalArgumentException.class, () -> homeLocator.setRelativePath(testFile));
 
         assertThat("Relative path can't be absolute", illegalArgumentException, notNullValue());
         assertThat(illegalArgumentException.getMessage(),

@@ -6,7 +6,7 @@ I.e. The name of the directory or folder where your program has been installed.
 
 ## Background
 
-Twice in the past I hade to figure this out, so I now finally wrote it down as a more general solution.
+Twice in the past I had to figure this out, so I now finally wrote it down as a more general solution.
 
 Hope it can help anyone else. At least now I know where to find the code the next time the problem arises :-)
 

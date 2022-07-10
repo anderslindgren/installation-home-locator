@@ -88,24 +88,24 @@ public class HomeLocator {
             }
             final File relativeLocation = applyRelativePath(location);
             result = relativeLocation.getCanonicalFile();
-            checkFileExistingOrThrowException(result);
-            checkFileIsDirectoryOrThrowException(result);
+            checkFileExists(result);
+            checkFileIsDirectory(result);
         } catch (URISyntaxException | IOException e) {
-            throw new HomeLocatorException(e);
+            throw new HomeLocatorException("Could not locate jar file", e);
         }
 
         return result;
     }
 
-    private void checkFileIsDirectoryOrThrowException(File file) {
-        if (!file.isDirectory()) {
-            throw new IllegalArgumentException("Relative path pointing to a file: " + file.getPath());
+    private void checkFileExists(File file) {
+        if (!file.exists()) {
+            throw new IllegalArgumentException("Relative path pointing to non-existing directory: " + file.getPath());
         }
     }
 
-    private void checkFileExistingOrThrowException(File file) {
-        if (!file.exists()) {
-            throw new IllegalArgumentException("Relative path pointing to non-existing directory: " + file.getPath());
+    private void checkFileIsDirectory(File file) {
+        if (!file.isDirectory()) {
+            throw new IllegalArgumentException("Relative path is not a directory: " + file.getPath());
         }
     }
 
