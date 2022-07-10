@@ -20,7 +20,7 @@ public class HomeLocatorIntegrationTest {
     public void locateHomeWhereNoRelativeGiven() throws IOException {
     	final HomeLocator locator = new HomeLocator();
         final File homeLocation = locator.getLocation();
-        final String expectedLocation = new File("target/classes").getCanonicalPath();
+        final String expectedLocation = new File("../source/target").getCanonicalPath();
         assertThat("Home location not found", homeLocation.getPath(), equalTo(expectedLocation));
     }
     
@@ -29,7 +29,7 @@ public class HomeLocatorIntegrationTest {
         final String tRelativePath = "..";
     	final HomeLocator locator = new HomeLocator(tRelativePath);
         final File homeLocation = locator.getLocation();
-        final String expectedLocation = new File("target").getCanonicalPath();
+        final String expectedLocation = new File("../source").getCanonicalPath();
         assertThat("Home location not found", homeLocation.getPath(), equalTo(expectedLocation));
     }
     
