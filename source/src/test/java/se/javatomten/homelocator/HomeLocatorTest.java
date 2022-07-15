@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -12,12 +13,21 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class HomeLocatorTest {
 
-    public static final String RELATIVE_PATH = "../..";
+    public static final String TWO_LEVELS_UP = "../..";
 
+    @Test
+    public void usePath() throws IOException {
+        final HomeLocator homeLocator = new HomeLocator();
+        final Path path = Path.of(TWO_LEVELS_UP);
+        homeLocator.setRelativePath(path);
+        final File homeLocation = homeLocator.getLocation();
+        final File expectedLocation = new File(".").getCanonicalFile();
+        assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
+    }
     @Test
     public void locateHomeWhereRelativeTwoLevelsUp() throws IOException {
         final HomeLocator homeLocator = new HomeLocator();
-        homeLocator.setRelativePath(RELATIVE_PATH);
+        homeLocator.setRelativePath(TWO_LEVELS_UP);
         final File homeLocation = homeLocator.getLocation();
         final File expectedLocation = new File(".").getCanonicalFile();
         assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
@@ -25,7 +35,7 @@ public class HomeLocatorTest {
 
     @Test
     public void locateHomeWhereRelativeTwoLevelsUpUsingStringConstructor() throws IOException {
-        final HomeLocator homeLocator = new HomeLocator(RELATIVE_PATH);
+        final HomeLocator homeLocator = new HomeLocator(TWO_LEVELS_UP);
         final File homeLocation = homeLocator.getLocation();
         final File expectedLocation = new File(".").getCanonicalFile();
         assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
@@ -33,7 +43,15 @@ public class HomeLocatorTest {
 
     @Test
     public void locateHomeWhereRelativeTwoLevelsUpUsingFileConstructor() throws IOException {
-        final HomeLocator homeLocator = new HomeLocator(new File(RELATIVE_PATH));
+        final HomeLocator homeLocator = new HomeLocator(new File(TWO_LEVELS_UP));
+        final File homeLocation = homeLocator.getLocation();
+        final File expectedLocation = new File(".").getCanonicalFile();
+        assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
+    }
+
+    @Test
+    public void usePathConstructor() throws IOException {
+        final HomeLocator homeLocator = new HomeLocator(Path.of(TWO_LEVELS_UP));
         final File homeLocation = homeLocator.getLocation();
         final File expectedLocation = new File(".").getCanonicalFile();
         assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
@@ -58,16 +76,16 @@ public class HomeLocatorTest {
 
     @Test
     public void getRelativePathTwoLevelsUp() {
-        final HomeLocator homeLocator = new HomeLocator(RELATIVE_PATH);
+        final HomeLocator homeLocator = new HomeLocator(TWO_LEVELS_UP);
         final File relativePath = homeLocator.getRelativePath();
-        assertThat("Relative File wrong", relativePath, equalTo(new File(RELATIVE_PATH)));
+        assertThat("Relative File wrong", relativePath, equalTo(new File(TWO_LEVELS_UP)));
     }
 
     @Test
     public void unsetRelativePath() {
-        final HomeLocator homeLocator = new HomeLocator(RELATIVE_PATH);
+        final HomeLocator homeLocator = new HomeLocator(TWO_LEVELS_UP);
         final File relativePath = homeLocator.getRelativePath();
-        assertEquals(new File(RELATIVE_PATH), relativePath, "Relative File wrong");
+        assertEquals(new File(TWO_LEVELS_UP), relativePath, "Relative File wrong");
         homeLocator.unsetRelativePath();
         RelativeLocationNotSetException relativeLocationNotSetException =
                 assertThrows(RelativeLocationNotSetException.class, homeLocator::getRelativePath);
