@@ -3,8 +3,8 @@ package se.javatomten.integrationtests;
 import org.junit.jupiter.api.Test;
 import se.javatomten.homelocator.HomeLocator;
 
-import java.io.File;
-import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -18,28 +18,28 @@ public class HomeLocatorIntegrationTest {
     public static final String LOCAL_REPO = "/.m2/repository/se/javatomten/installation-home-locator/home-locator";
 
     @Test
-    public void locateHomeWhereNoRelativeGiven() throws IOException {
+    public void locateHomeWhereNoRelativeGiven() {
         final HomeLocator locator = new HomeLocator();
-        final File homeLocation = locator.getLocation();
-        final String expectedLocation = new File("../source/target").getCanonicalPath();
-        final String expectedLocation2 = new File("../source/target/classes").getCanonicalPath();
+        final Path homeLocation = locator.getLocation();
+        final String expectedLocation = Path.of("../source/target").toAbsolutePath().normalize().toString();
+        final String expectedLocation2 = Path.of("../source/target/classes").toAbsolutePath().normalize().toString();
         final String userHome = System.getProperty("user.home");
-        final String expectedLocation3 = new File(userHome + LOCAL_REPO + "/1.0.0").getCanonicalPath();
-        String locationPath = homeLocation.getPath();
+        final String expectedLocation3 = Path.of(userHome + LOCAL_REPO + "/1.0.0").toAbsolutePath().normalize().toString();
+        String locationPath = homeLocation.toString();
         assertThat("Home location not found", locationPath,
                 anyOf(equalTo(expectedLocation), equalTo(expectedLocation2), equalTo(expectedLocation3)));
     }
-    
+
     @Test
-    public void locateHomeWhereRelativeIsOneLevelUp() throws IOException {
+    public void locateHomeWhereRelativeIsOneLevelUp() {
         final String relativePath = "..";
         final HomeLocator locator = new HomeLocator(relativePath);
-        final File homeLocation = locator.getLocation();
-        final String expectedLocation = new File("../source").getCanonicalPath();
-        final String expectedLocation2 = new File("../source/target").getCanonicalPath();
+        final Path homeLocation = locator.getLocation();
+        final String expectedLocation = Path.of("../source").toAbsolutePath().normalize().toString();
+        final String expectedLocation2 = Path.of("../source/target").toAbsolutePath().normalize().toString();
         final String userHome = System.getProperty("user.home");
-        final String expectedLocation3 = new File(userHome + LOCAL_REPO).getCanonicalPath();
-        String locationPath = homeLocation.getPath();
+        final String expectedLocation3 = Path.of(userHome + LOCAL_REPO).toAbsolutePath().normalize().toString();
+        String locationPath = homeLocation.toString();
         assertThat("Home location not found", locationPath,
                 anyOf(equalTo(expectedLocation), equalTo(expectedLocation2), equalTo(expectedLocation3)));
     }
@@ -67,9 +67,9 @@ public class HomeLocatorIntegrationTest {
     
     @Test
     public void absolutePathIsNotAllowed() {
-        final char separatorChar = File.separatorChar;
+        final String separator = FileSystems.getDefault().getSeparator();
         final String absolutePath;
-        if (separatorChar == '/') {
+        if ("/".equals(separator)) {
             absolutePath = "/home/sweet/home"; // On Unix
         } else {
             absolutePath = "C:/home/sweet/home"; // On Windows

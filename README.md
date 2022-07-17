@@ -21,7 +21,7 @@ So how do I use this? It's easy! Include the jar file in your directory of third
 In your application you only need to add a few lines (or cram it together on one line if you like):
 
 ```java
-import java.io.File;
+import java.nio.file.Path;
 import se.javatomten.homelocator.*;
 
 public class MyApplication {
@@ -32,7 +32,7 @@ public class MyApplication {
         // You can give a relative path (i.e. "..") as an argument to the Constructor.
         final String relativePath = "..";
         final HomeLocator locator = new HomeLocator(relativePath);
-        final File homeDirectory = locator.getLocation();
+        final Path homeDirectory = locator.getLocation();
 
         System.out.println("MyApplication is installed in: " + homeDirectory);
     }

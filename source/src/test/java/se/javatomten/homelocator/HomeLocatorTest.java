@@ -2,13 +2,11 @@ package se.javatomten.homelocator;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class HomeLocatorTest {
@@ -16,52 +14,45 @@ public class HomeLocatorTest {
     public static final String TWO_LEVELS_UP = "../..";
 
     @Test
-    public void usePath() throws IOException {
+    public void usePath() {
         final HomeLocator homeLocator = new HomeLocator();
         final Path path = Path.of(TWO_LEVELS_UP);
         homeLocator.setRelativePath(path);
-        final File homeLocation = homeLocator.getLocation();
-        final File expectedLocation = new File(".").getCanonicalFile();
+        final Path homeLocation = homeLocator.getLocation();
+        final Path expectedLocation = Path.of(".").normalize().toAbsolutePath();
         assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
     }
+
     @Test
-    public void locateHomeWhereRelativeTwoLevelsUp() throws IOException {
+    public void locateHomeWhereRelativeTwoLevelsUp() {
         final HomeLocator homeLocator = new HomeLocator();
         homeLocator.setRelativePath(TWO_LEVELS_UP);
-        final File homeLocation = homeLocator.getLocation();
-        final File expectedLocation = new File(".").getCanonicalFile();
+        final Path homeLocation = homeLocator.getLocation();
+        final Path expectedLocation = Path.of(".").normalize().toAbsolutePath();
         assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
     }
 
     @Test
-    public void locateHomeWhereRelativeTwoLevelsUpUsingStringConstructor() throws IOException {
+    public void locateHomeWhereRelativeTwoLevelsUpUsingStringConstructor() {
         final HomeLocator homeLocator = new HomeLocator(TWO_LEVELS_UP);
-        final File homeLocation = homeLocator.getLocation();
-        final File expectedLocation = new File(".").getCanonicalFile();
+        final Path homeLocation = homeLocator.getLocation();
+        final Path expectedLocation = Path.of(".").normalize().toAbsolutePath();
         assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
     }
 
     @Test
-    public void locateHomeWhereRelativeTwoLevelsUpUsingFileConstructor() throws IOException {
-        final HomeLocator homeLocator = new HomeLocator(new File(TWO_LEVELS_UP));
-        final File homeLocation = homeLocator.getLocation();
-        final File expectedLocation = new File(".").getCanonicalFile();
-        assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
-    }
-
-    @Test
-    public void usePathConstructor() throws IOException {
+    public void locateHomeWhereRelativeTwoLevelsUpUsingPathConstructor() {
         final HomeLocator homeLocator = new HomeLocator(Path.of(TWO_LEVELS_UP));
-        final File homeLocation = homeLocator.getLocation();
-        final File expectedLocation = new File(".").getCanonicalFile();
+        final Path homeLocation = homeLocator.getLocation();
+        final Path expectedLocation = Path.of(".").normalize().toAbsolutePath();
         assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
     }
 
     @Test
-    public void locateHomeWhereNoRelativeIsGiven() throws IOException {
+    public void locateHomeWhereNoRelativeIsGiven() {
         final HomeLocator homeLocator = new HomeLocator();
-        final File homeLocation = homeLocator.getLocation();
-        final File expectedLocation = new File("target/classes").getCanonicalFile();
+        final Path homeLocation = homeLocator.getLocation();
+        final Path expectedLocation = Path.of("target/classes").normalize().toAbsolutePath();
         assertThat("Could not find expected location", homeLocation, equalTo(expectedLocation));
     }
 
@@ -77,15 +68,16 @@ public class HomeLocatorTest {
     @Test
     public void getRelativePathTwoLevelsUp() {
         final HomeLocator homeLocator = new HomeLocator(TWO_LEVELS_UP);
-        final File relativePath = homeLocator.getRelativePath();
-        assertThat("Relative File wrong", relativePath, equalTo(new File(TWO_LEVELS_UP)));
+        final Path relativePath = homeLocator.getRelativePath();
+        Path expectedPath = Path.of(TWO_LEVELS_UP);
+        assertThat("Relative File wrong", relativePath, equalTo(expectedPath));
     }
 
     @Test
     public void unsetRelativePath() {
         final HomeLocator homeLocator = new HomeLocator(TWO_LEVELS_UP);
-        final File relativePath = homeLocator.getRelativePath();
-        assertEquals(new File(TWO_LEVELS_UP), relativePath, "Relative File wrong");
+        final Path relativePath = homeLocator.getRelativePath();
+        assertThat("Relative File wrong", Path.of(TWO_LEVELS_UP), equalTo(relativePath));
         homeLocator.unsetRelativePath();
         RelativeLocationNotSetException relativeLocationNotSetException =
                 assertThrows(RelativeLocationNotSetException.class, homeLocator::getRelativePath);
@@ -118,12 +110,13 @@ public class HomeLocatorTest {
         assertThat(illegalArgumentException.getMessage(),
                 equalTo("The parameter relativePath can not be null"));
     }
+
     @Test
     public void nullRelativePathFileIsNotAllowed() {
         final HomeLocator homeLocator = new HomeLocator();
 
         IllegalArgumentException illegalArgumentException =
-                assertThrows(IllegalArgumentException.class, () -> homeLocator.setRelativePath((File) null));
+                assertThrows(IllegalArgumentException.class, () -> homeLocator.setRelativePath((Path) null));
 
         assertThat("Non existing directory is not allowed", illegalArgumentException, notNullValue());
         assertThat(illegalArgumentException.getMessage(),
@@ -145,9 +138,9 @@ public class HomeLocatorTest {
     @Test
     public void absolutePathIsNotAllowed() {
         final HomeLocator homeLocator = new HomeLocator();
-        final char separatorChar = File.separatorChar;
+        final String separator = FileSystems.getDefault().getSeparator();
         final String testFile;
-        if (separatorChar == '/') {
+        if ("/".equals(separator)) {
             testFile = "/home/sweet/home"; // On Unix
         } else {
             testFile = "C:/home/sweet/home"; // On Windows
