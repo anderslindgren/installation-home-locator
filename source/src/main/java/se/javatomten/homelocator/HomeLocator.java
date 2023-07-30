@@ -57,7 +57,8 @@ public class HomeLocator {
             throw new IllegalArgumentException("The parameter relativePath can not be null");
         }
         if (relativePath.isAbsolute()) {
-            throw new IllegalArgumentException("The parameter relativePath must be a relative path: " + relativePath);
+            throw new IllegalArgumentException("The parameter relativePath can not be an absolute path: "
+                    + relativePath);
         }
         this.relativePath = relativePath;
         relativePathGiven = true;
