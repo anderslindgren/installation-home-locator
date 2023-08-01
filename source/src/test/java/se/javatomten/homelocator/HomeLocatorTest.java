@@ -6,7 +6,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class HomeLocatorTest {
 
@@ -14,21 +14,23 @@ class HomeLocatorTest {
 
     @Test
     void usePath() {
-        final HomeLocator homeLocator = new HomeLocator();
         final Path path = Path.of(TWO_LEVELS_UP);
-        homeLocator.setRelativePath(path);
+        final HomeLocator homeLocator = new HomeLocator(path);
         final Path homeLocation = homeLocator.getLocation();
         final Path expectedLocation = Path.of(".").normalize().toAbsolutePath();
-        assertThat(homeLocation).as("locations should match").isEqualTo(expectedLocation);
+        assertThat(homeLocation)
+                .as("locations should match")
+                .isEqualTo(expectedLocation);
     }
 
     @Test
     void locateHomeWhereRelativeTwoLevelsUp() {
-        final HomeLocator homeLocator = new HomeLocator();
-        homeLocator.setRelativePath(TWO_LEVELS_UP);
+        final HomeLocator homeLocator = new HomeLocator(TWO_LEVELS_UP);
         final Path homeLocation = homeLocator.getLocation();
         final Path expectedLocation = Path.of(".").normalize().toAbsolutePath();
-        assertThat(homeLocation).as("locations should match").isEqualTo(expectedLocation);
+        assertThat(homeLocation)
+                .as("locations should match")
+                .isEqualTo(expectedLocation);
     }
 
     @Test
@@ -36,7 +38,9 @@ class HomeLocatorTest {
         final HomeLocator homeLocator = new HomeLocator(TWO_LEVELS_UP);
         final Path homeLocation = homeLocator.getLocation();
         final Path expectedLocation = Path.of(".").normalize().toAbsolutePath();
-        assertThat(homeLocation).as("locations should match").isEqualTo(expectedLocation);
+        assertThat(homeLocation)
+                .as("locations should match")
+                .isEqualTo(expectedLocation);
     }
 
     @Test
@@ -44,7 +48,9 @@ class HomeLocatorTest {
         final HomeLocator homeLocator = new HomeLocator(Path.of(TWO_LEVELS_UP));
         final Path homeLocation = homeLocator.getLocation();
         final Path expectedLocation = Path.of(".").normalize().toAbsolutePath();
-        assertThat(homeLocation).as("locations should match").isEqualTo(expectedLocation);
+        assertThat(homeLocation)
+                .as("locations should match")
+                .isEqualTo(expectedLocation);
     }
 
     @Test
@@ -52,89 +58,49 @@ class HomeLocatorTest {
         final HomeLocator homeLocator = new HomeLocator();
         final Path homeLocation = homeLocator.getLocation();
         final Path expectedLocation = Path.of("target/classes").normalize().toAbsolutePath();
-        assertThat(homeLocation).as("locations should match").isEqualTo(expectedLocation);
-    }
-
-    @Test
-    void getRelativePathWhenNonHasBeenGiven() {
-        final HomeLocator homeLocator = new HomeLocator();
-        final RelativeLocationNotSetException relativeLocationNotSetException =
-                assertThrows(RelativeLocationNotSetException.class, homeLocator::getRelativePath);
-        assertThat(relativeLocationNotSetException).isNotNull();
-        assertThat(relativeLocationNotSetException).hasMessage("Relative path not set");
-    }
-
-    @Test
-    void getRelativePathTwoLevelsUp() {
-        final HomeLocator homeLocator = new HomeLocator(TWO_LEVELS_UP);
-        final Path relativePath = homeLocator.getRelativePath();
-        final Path expectedPath = Path.of(TWO_LEVELS_UP);
-        assertThat(relativePath).as("paths should match").isEqualTo(expectedPath);
-    }
-
-    @Test
-    void unsetRelativePath() {
-        final HomeLocator homeLocator = new HomeLocator(TWO_LEVELS_UP);
-        final Path relativePath = homeLocator.getRelativePath();
-        final Path expectedPath = Path.of(TWO_LEVELS_UP);
-        assertThat(relativePath).as("paths should match").isEqualTo(expectedPath);
-        homeLocator.unsetRelativePath();
-        final RelativeLocationNotSetException relativeLocationNotSetException =
-                assertThrows(RelativeLocationNotSetException.class, homeLocator::getRelativePath);
-
-        assertThat(relativeLocationNotSetException).isNotNull();
-        assertThat(relativeLocationNotSetException).hasMessage("Relative path not set");
+        assertThat(homeLocation)
+                .as("locations should match")
+                .isEqualTo(expectedLocation);
     }
 
     @Test
     void nonExistingRelativePathIsNotAllowed() {
-        final HomeLocator homeLocator = new HomeLocator();
-        homeLocator.setRelativePath("../garble");
+        final HomeLocator homeLocator = new HomeLocator("../garble");
 
-        final IllegalArgumentException illegalArgumentException =
-                assertThrows(IllegalArgumentException.class, homeLocator::getLocation);
-
-        assertThat(illegalArgumentException).isNotNull();
-        assertThat(illegalArgumentException)
-                .hasMessageStartingWith("Relative path pointing to non-existing directory:");
+        assertThatIllegalArgumentException()
+                .isThrownBy(homeLocator::getLocation)
+                .as("Can not point to a non-existing directory")
+                .withMessageStartingWith("Relative path pointing to non-existing directory:");
     }
 
     @Test
     void nullRelativePathIsNotAllowed() {
-        final HomeLocator homeLocator = new HomeLocator();
-
-        final IllegalArgumentException illegalArgumentException =
-                assertThrows(IllegalArgumentException.class, () -> homeLocator.setRelativePath((String) null));
-
-        assertThat(illegalArgumentException).isNotNull();
-        assertThat(illegalArgumentException).hasMessage("The parameter relativePath can not be null");
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new HomeLocator((String) null))
+                .as("Not ok to give null as parameter")
+                .withMessage("The parameter relativePath can not be null");
     }
 
     @Test
     void nullRelativePathFileIsNotAllowed() {
-        final HomeLocator homeLocator = new HomeLocator();
-
-        final IllegalArgumentException illegalArgumentException =
-                assertThrows(IllegalArgumentException.class, () -> homeLocator.setRelativePath((Path) null));
-
-        assertThat(illegalArgumentException).isNotNull();
-        assertThat(illegalArgumentException).hasMessage("The parameter relativePath can not be null");
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new HomeLocator((Path) null))
+                .as("Not ok to give null as parameter")
+                .withMessageStartingWith("The parameter relativePath can not be null");
     }
 
     @Test
     void relativePathPointingToFileIsNotAllowed() {
-        final HomeLocator homeLocator = new HomeLocator();
-        homeLocator.setRelativePath("README.md");
-        final IllegalArgumentException illegalArgumentException =
-                assertThrows(IllegalArgumentException.class, homeLocator::getLocation);
+        final HomeLocator homeLocator = new HomeLocator("README.md");
 
-        assertThat(illegalArgumentException).isNotNull();
-        assertThat(illegalArgumentException).hasMessageStartingWith("Relative path is not a directory:");
+        assertThatIllegalArgumentException()
+                .isThrownBy(homeLocator::getLocation)
+                .as("It is not allowed to give a file as relative path")
+                .withMessageStartingWith("Relative path is not a directory:");
     }
 
     @Test
     void absolutePathIsNotAllowed() {
-        final HomeLocator homeLocator = new HomeLocator();
         final String separator = FileSystems.getDefault().getSeparator();
         final String testPath;
         if ("/".equals(separator)) {
@@ -142,11 +108,10 @@ class HomeLocatorTest {
         } else {
             testPath = "C:/home/sweet/home"; // On Windows
         }
-        final IllegalArgumentException illegalArgumentException =
-                assertThrows(IllegalArgumentException.class, () -> homeLocator.setRelativePath(testPath));
 
-        assertThat(illegalArgumentException).isNotNull();
-        assertThat(illegalArgumentException)
-                .hasMessageStartingWith("The parameter relativePath can not be an absolute path:");
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new HomeLocator(testPath))
+                .as("The relative path can not be an absolute path")
+                .withMessageStartingWith("The parameter relativePath can not be an absolute path:");
     }
 }

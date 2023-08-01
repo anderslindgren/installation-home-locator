@@ -6,67 +6,62 @@ import se.javatomten.homelocator.HomeLocator;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatPath;
 
 /**
  * Tests to be run with the HomeLocator class in a jar file.
  */
-public class HomeLocatorIntegrationTest {
+class HomeLocatorIntegrationTest {
 
-    public static final String LOCAL_REPO = "/.m2/repository/se/javatomten/installation-home-locator/home-locator";
+    private static final String LOCAL_REPO = "/.m2/repository/se/javatomten/installation-home-locator/home-locator";
 
     @Test
-    public void locateHomeWhereNoRelativeGiven() {
+    void locateHomeWhereNoRelativeGiven() {
         final HomeLocator locator = new HomeLocator();
         final Path homeLocation = locator.getLocation();
-        final String expectedLocation = Path.of("../source/target").toAbsolutePath().normalize().toString();
-        final String expectedLocation2 = Path.of("../source/target/classes").toAbsolutePath().normalize().toString();
+        final Path expectedLocation = Path.of("../source/target").toAbsolutePath().normalize();
+        final Path expectedLocation2 = Path.of("../source/target/classes").toAbsolutePath().normalize();
         final String userHome = System.getProperty("user.home");
-        final String expectedLocation3 = Path.of(userHome + LOCAL_REPO + "/1.0.0").toAbsolutePath().normalize().toString();
-        String locationPath = homeLocation.toString();
-        assertThat("Home location not found", locationPath,
-                anyOf(equalTo(expectedLocation), equalTo(expectedLocation2), equalTo(expectedLocation3)));
+        final Path expectedLocation3 = Path.of(userHome + LOCAL_REPO + "/1.0.0").toAbsolutePath().normalize();
+        assertThatPath(homeLocation)
+                .isIn(expectedLocation, expectedLocation2, expectedLocation3);
     }
 
     @Test
-    public void locateHomeWhereRelativeIsOneLevelUp() {
+    void locateHomeWhereRelativeIsOneLevelUp() {
         final String relativePath = "..";
         final HomeLocator locator = new HomeLocator(relativePath);
         final Path homeLocation = locator.getLocation();
-        final String expectedLocation = Path.of("../source").toAbsolutePath().normalize().toString();
-        final String expectedLocation2 = Path.of("../source/target").toAbsolutePath().normalize().toString();
+        final Path expectedLocation = Path.of("../source").toAbsolutePath().normalize();
+        final Path expectedLocation2 = Path.of("../source/target").toAbsolutePath().normalize();
         final String userHome = System.getProperty("user.home");
-        final String expectedLocation3 = Path.of(userHome + LOCAL_REPO).toAbsolutePath().normalize().toString();
-        String locationPath = homeLocation.toString();
-        assertThat("Home location not found", locationPath,
-                anyOf(equalTo(expectedLocation), equalTo(expectedLocation2), equalTo(expectedLocation3)));
+        final Path expectedLocation3 = Path.of(userHome + LOCAL_REPO).toAbsolutePath().normalize();
+        assertThatPath(homeLocation)
+                .isIn(expectedLocation, expectedLocation2, expectedLocation3);
     }
-    
+
     @Test
-    public void nonExistingRelativePathIsNotAllowed() {
-    	final HomeLocator locator = new HomeLocator("../garble");
+    void nonExistingRelativePathIsNotAllowed() {
+        final HomeLocator locator = new HomeLocator("../garble");
 
-        IllegalArgumentException illegalArgumentException =
-                assertThrows(IllegalArgumentException.class, locator::getLocation);
-
-        assertThat("Missing exception: Non existing directory is not allowed",
-                illegalArgumentException, notNullValue());
+        assertThatIllegalArgumentException()
+                .isThrownBy(locator::getLocation)
+                .as("Message must reflect relative path is not aan existing directory")
+                .withMessageStartingWith("Relative path pointing to non-existing directory:");
     }
-    
+
     @Test
-    public void relativePathPointingToFileIsNotAllowed() {
-    	final HomeLocator locator = new HomeLocator("README");
-
-        IllegalArgumentException illegalArgumentException =
-                assertThrows(IllegalArgumentException.class, locator::getLocation);
-
-        assertThat("Missing exception: Can't point to a file", illegalArgumentException, notNullValue());
+    void relativePathPointingToFileIsNotAllowed() {
+        HomeLocator homeLocator = new HomeLocator("README.md", HomeLocatorIntegrationTest.class);
+        assertThatIllegalArgumentException()
+                .isThrownBy(homeLocator::getLocation)
+                .as("Message must reflect relative path is not a directory")
+                .withMessageStartingWith("Relative path is not a directory:");
     }
-    
+
     @Test
-    public void absolutePathIsNotAllowed() {
+    void absolutePathIsNotAllowed() {
         final String separator = FileSystems.getDefault().getSeparator();
         final String absolutePath;
         if ("/".equals(separator)) {
@@ -75,10 +70,9 @@ public class HomeLocatorIntegrationTest {
             absolutePath = "C:/home/sweet/home"; // On Windows
         }
 
-        IllegalArgumentException illegalArgumentException =
-                assertThrows(IllegalArgumentException.class, () -> new HomeLocator(absolutePath));
-
-        assertThat("Missing exception: Relative path can't be absolute",
-                illegalArgumentException, notNullValue());
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new HomeLocator(absolutePath))
+                .as("Message must reflect absolute path")
+                .withMessageStartingWith("The parameter relativePath can not be an absolute path:");
     }
 }
