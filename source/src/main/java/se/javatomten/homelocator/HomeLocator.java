@@ -106,16 +106,17 @@ public class HomeLocator {
     public Path getLocation() {
         final String className = Arrays.stream(locatorClasses)
                 .findFirst()
-                .orElseThrow()
+                .orElseThrow(() -> new HomeLocatorException("Locator class was not found"))
                 .getName();
         final String classFileName = convertClassNameToFileName(className);
         try {
             final URI uri = getClassURI(classFileName);
+            final String scheme = uri.getScheme();
             final Path location;
-            if (isClassPackagedInJar(uri)) {
-                location = locateDirectoryFromJarFile(uri);
-            } else {
-                location = locateDirectoryFromClassFile(classFileName, uri);
+            switch (scheme) {
+                case "jar" -> location = locateDirectoryFromJarFile(uri);
+                case "file" -> location = locateDirectoryFromClassFile(classFileName, uri);
+                default -> throw new HomeLocatorException("Class is not available in a jar or classfile");
             }
             final Path result = applyRelativePath(location);
             checkResult(result);
@@ -134,10 +135,6 @@ public class HomeLocator {
         }
     }
 
-    private boolean isClassPackagedInJar(URI uri) {
-        return uri.getScheme().equals("jar");
-    }
-
     private Path applyRelativePath(Path location) {
         Path result;
         if (relativePath != null) {
@@ -154,7 +151,7 @@ public class HomeLocator {
 
     private URI getClassURI(String classFileName) throws URISyntaxException {
         final URL resource = ClassLoader.getSystemClassLoader().getResource(classFileName);
-        if (resource == null) { // This should not be possible as it would mean it can not find this class
+        if (resource == null) { // This should not be possible as it would mean it can not find the locator class
             throw new HomeLocatorException("Could not find home locator class");
         }
         return resource.toURI();
@@ -166,11 +163,9 @@ public class HomeLocator {
     }
 
     private Path locateDirectoryFromJarFile(URI uri) {
-        String path = uri.getSchemeSpecificPart();
+        final String path = uri.getSchemeSpecificPart();
         final int jarFileSeparatorPosition = path.lastIndexOf(JAR_CONTENT_SEPARATOR);
-        if (jarFileSeparatorPosition >= 0) {
-            path = path.substring("file:".length(), jarFileSeparatorPosition);
-        }
-        return Path.of(path).getParent();
+        final String truePath = path.substring("file:".length(), jarFileSeparatorPosition);
+        return Path.of(truePath).getParent();
     }
 }
