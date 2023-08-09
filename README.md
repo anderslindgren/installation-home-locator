@@ -1,7 +1,8 @@
 # Introduction
+
 Welcome to the installation-home-locator!
 
-This is a project written in Java that will help you make it easier to find your installation home directory. 
+This is a project written in Java that will help you make it easier to find your installation home directory.
 I.e. The name of the directory or folder where your program has been installed.
 
 ## Background
@@ -12,25 +13,31 @@ Hope it can help anyone else. At least now I know where to find the code the nex
 
 # Usage
 
-The Installation Home Locator is meant to be used as a utility to drop in to your application. 
-It will return the directory where your code has been installed. 
+The Installation Home Locator is meant to be used as a utility to drop in to your application.
+Specially if you are developing a GUI application, you don't know where in the file system your
+application is finally being deployed.
+
+The HomeLocator will return the directory where your code has been installed.
+
 All this can be achieved with various start scripts in bash or bat-files, but it's more fun doing it in pure Java.
 
-So how do I use this? It's easy! Include the jar file in your directory of third-party jars and add it to your classpath.
+So how do I use this? It's easy! Include the jar file in your directory of third-party jars and add it to your
+classpath.
 
 In your application you only need to add a few lines (or cram it together on one line if you like):
 
 ```java
 import java.nio.file.Path;
+
 import se.javatomten.homelocator.*;
 
 public class MyApplication {
 
-    public MyApplication () {
+    public MyApplication() {
         // Option; Give a relative path to the directory you actually call home.
         // I.e. if the jar file is located in a subdirectory to your home directory, as "lib"
-        // You can give a relative path (i.e. "..") as an argument to the Constructor.
-        final String relativePath = "..";
+        // You can give a relative path (i.e. "../") as an argument to the Constructor.
+        final String relativePath = "../";
         final HomeLocator locator = new HomeLocator(relativePath);
         final Path homeDirectory = locator.getLocation();
 
@@ -39,3 +46,4 @@ public class MyApplication {
 }
 ```
 
+It is also possible to add another class as a locator class if you have the HomeLocator class in a maven directory.
