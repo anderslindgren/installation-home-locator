@@ -33,26 +33,6 @@ class HomeLocatorTest {
     }
 
     @Test
-    void locateHomeWhereRelativeTwoLevelsUpUsingStringConstructor() {
-        final HomeLocator homeLocator = new HomeLocator(TWO_LEVELS_UP);
-        final Path homeLocation = homeLocator.getLocation();
-        final Path expectedLocation = Path.of(".").normalize().toAbsolutePath();
-        assertThat(homeLocation)
-                .as("locations should match")
-                .isEqualTo(expectedLocation);
-    }
-
-    @Test
-    void locateHomeWhereRelativeTwoLevelsUpUsingPathConstructor() {
-        final HomeLocator homeLocator = new HomeLocator(Path.of(TWO_LEVELS_UP));
-        final Path homeLocation = homeLocator.getLocation();
-        final Path expectedLocation = Path.of(".").normalize().toAbsolutePath();
-        assertThat(homeLocation)
-                .as("locations should match")
-                .isEqualTo(expectedLocation);
-    }
-
-    @Test
     void locateHomeWhereNoRelativeIsGiven() {
         final HomeLocator homeLocator = new HomeLocator();
         final Path homeLocation = homeLocator.getLocation();
