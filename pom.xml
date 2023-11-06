@@ -6,7 +6,7 @@
     <groupId>se.javatomten.installation-home-locator</groupId>
     <artifactId>home-locator-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0</version>
+    <version>2.1.0</version>
     <name>Installation Home Locator Parent</name>
 
     <description>See README file.</description>
@@ -25,16 +25,16 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.10.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>3.24.2</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter</artifactId>
-                <version>5.10.0</version>
-                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
