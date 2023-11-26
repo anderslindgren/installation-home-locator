@@ -9,7 +9,9 @@
     <version>2.1.0</version>
     <name>Installation Home Locator Parent</name>
 
-    <description>See README file.</description>
+    <description>The Installation Home Locator is meant to be used as a utility to drop in to your application. 
+             Specially if you are developing a GUI application, you don't know where in the file system your application is finally being deployed.
+    </description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
