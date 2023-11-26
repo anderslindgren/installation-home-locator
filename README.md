@@ -1,17 +1,20 @@
-# Introduction
+# Installation Home Locator
+[![Java CI with Maven](https://github.com/anderslindgren/installation-home-locator/actions/workflows/maven.yml/badge.svg)](https://github.com/anderslindgren/installation-home-locator/actions/workflows/maven.yml)
+
+## Introduction
 
 Welcome to the installation-home-locator!
 
 This is a project written in Java that will help you make it easier to find your installation home directory.
 I.e. The name of the directory or folder where your program has been installed.
 
-## Background
+### Background
 
 Twice in the past I had to figure this out, so I now finally wrote it down as a more general solution.
 
 Hope it can help anyone else. At least now I know where to find the code the next time the problem arises :-)
 
-# Usage
+## Usage
 
 The Installation Home Locator is meant to be used as a utility to drop in to your application.
 Specially if you are developing a GUI application, you don't know where in the file system your
