@@ -116,7 +116,9 @@ public class HomeLocator {
             switch (scheme) {
                 case "jar" -> location = locateDirectoryFromJarFile(uri);
                 case "file" -> location = locateDirectoryFromClassFile(classFileName, uri);
-                default -> throw new HomeLocatorException("Class is not available in a jar or classfile");
+                case "jrt" -> location = Path.of(System.getProperty("java.home"));
+//                        throw new HomeLocatorException("Locator class is part of the Java Runtime");
+                default -> throw new HomeLocatorException("Unsupported class container: " + scheme);
             }
             final Path result = applyRelativePath(location);
             checkResult(result);

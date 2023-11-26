@@ -95,11 +95,22 @@ class HomeLocatorTest {
     }
 
     @Test
-    void locatorClassNotInJarFileOrClassFile() {
+    void locatorClassInJVM() {
         Class<?> locatorClass = String.class;
+        Path location = new HomeLocator(locatorClass).getLocation();
+        assertThat(location).isDirectory().isAbsolute();
+//        assertThatExceptionOfType(HomeLocatorException.class)
+//                .isThrownBy(() -> new HomeLocator(locatorClass).getLocation())
+//                .as("locator class must be in a jar file or class file")
+//                .withMessage("Locator class is part of the Java Runtime");
+    }
+
+    @Test
+    void locatorClassNotInJarFileOrClassFile() {
+        Class<?> locatorClass = java.lang.
         assertThatExceptionOfType(HomeLocatorException.class)
                 .isThrownBy(() -> new HomeLocator(locatorClass).getLocation())
                 .as("locator class must be in a jar file or class file")
-                .withMessageStartingWith("Class is not available in a jar or classfile");
+                .withMessage("Locator class is part of the Java Runtime");
     }
 }
