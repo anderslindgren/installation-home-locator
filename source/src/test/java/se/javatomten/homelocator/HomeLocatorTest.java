@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class HomeLocatorTest {
 
@@ -99,18 +100,6 @@ class HomeLocatorTest {
         Class<?> locatorClass = String.class;
         Path location = new HomeLocator(locatorClass).getLocation();
         assertThat(location).isDirectory().isAbsolute();
-//        assertThatExceptionOfType(HomeLocatorException.class)
-//                .isThrownBy(() -> new HomeLocator(locatorClass).getLocation())
-//                .as("locator class must be in a jar file or class file")
-//                .withMessage("Locator class is part of the Java Runtime");
     }
 
-    @Test
-    void locatorClassNotInJarFileOrClassFile() {
-        Class<?> locatorClass = java.lang.
-        assertThatExceptionOfType(HomeLocatorException.class)
-                .isThrownBy(() -> new HomeLocator(locatorClass).getLocation())
-                .as("locator class must be in a jar file or class file")
-                .withMessage("Locator class is part of the Java Runtime");
-    }
 }
