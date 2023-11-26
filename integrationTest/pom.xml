@@ -43,7 +43,7 @@
         <dependency>
             <groupId>se.javatomten.installation-home-locator</groupId>
             <artifactId>home-locator</artifactId>
-            <version>1.0.0</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
